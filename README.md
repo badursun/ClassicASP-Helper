@@ -35,4 +35,12 @@ Eğer bir form yada querystring verisi almak istiyorsanız Query.Data("anahtar")
 	Query.Run("SELECT ID FROM tbl_tableName WHERE ID = "& .Data("ID") &" ")
 	Query.Run("SELECT ID FROM tbl_tableName WHERE ID = 1 ")
 
+## Response.Redirect
+
+İşleminizi tamamladıktan sonra kullandığınız Response.Redirect "url.asp?some=string" yerine kullanabileceğiniz bir komuttur. Amaç, Set edilen objelerin komple kapatılabilmesi içindir. Açtığınız DB bağlantıları, kapatılmamış Set tanımları gibi tüm açık objeleri kapatarak redirect işlemi yapabilirsiniz. Ayrıca güncel verilerinizi içine işleyebilirsiniz. Form yada Querystring parametresi çekmek için Parametrik Güncellemeler kullanılabilir.
+
+	Query.Go("url.asp?some=string")
+	Query.Go("url.asp?some={ID}")
+
+
 
