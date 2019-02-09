@@ -17,11 +17,11 @@ Class QueryManager
 	Private Sub Class_Initialize()
 		' Set Connection Obj
 		Set ConnectionObj = Conn
-		DebugMode 				= False
-		sql_add 					= ""
-		sql1 							= ""
-		sql2 							= ""
-		TotalRows 				= 0
+		DebugMode = False
+		sql_add = ""
+		sql1 = ""
+		sql2 = ""
+		TotalRows = 0
 	End Sub
 
 	'----------------------------------------
@@ -87,14 +87,70 @@ Class QueryManager
 	End Property
 
 	'----------------------------------------
-	' Query Returned Total Row
+	' URL Parse
+	'----------------------------------------
+	Public Function URLFrom404(Data, Hangisi)
+	  Hangisi = Hangisi & "="
+	    dim sResult 
+	    dim lStart
+	    dim lEnd
+	    
+	    lStart = instr( 1, Data, Hangisi, 1 )
+	    if lStart > 0 then 
+	        lStart = lStart + len(Hangisi)
+	        lEnd = instr( lStart, Data, "&" )
+	        if lEnd = 0 then lEnd = len( Data )
+	        
+	        sResult = mid( Data, lStart, lEnd - lStart )
+	    end if
+	    
+	    URLFrom404 = SQLInjectionBlocker(sResult)
+	End function
+
+	'----------------------------------------
+	' SQLInjection Blocker
+	'----------------------------------------
+	Public Function SQLInjectionBlocker(vData)
+		vData = Replace(vData, "script", "&#115;cript", 1, -1, 0)
+		vData = Replace(vData, "SCRIPT", "&#083;CRIPT", 1, -1, 0)
+		vData = Replace(vData, "Script", "&#083;cript", 1, -1, 0)
+		vData = Replace(vData, "script", "&#083;cript", 1, -1, 1)
+		vData = Replace(vData, "object", "&#111;bject", 1, -1, 0)
+		vData = Replace(vData, "OBJECT", "&#079;BJECT", 1, -1, 0)
+		vData = Replace(vData, "Object", "&#079;bject", 1, -1, 0)
+		vData = Replace(vData, "object", "&#079;bject", 1, -1, 1)
+		vData = Replace(vData, "document", "&#100;ocument", 1, -1, 0)
+		vData = Replace(vData, "DOCUMENT", "&#068;OCUMENT", 1, -1, 0)
+		vData = Replace(vData, "Document", "&#068;ocument", 1, -1, 0)
+		vData = Replace(vData, "document", "&#068;ocument", 1, -1, 1)
+		vData = Replace(vData, "cookie", "&#099;ookie", 1, -1, 0)
+		vData = Replace(vData, "COOKIE", "&#067;OOKIE", 1, -1, 0)
+		vData = Replace(vData, "Cookie", "&#067;ookie", 1, -1, 0)
+		vData = Replace(vData, "cookie", "&#067;ookie", 1, -1, 1)
+		vData = Replace(vData, "document.cookie", "&#068;ocument.cookie", 1, -1, 1)
+		vData = Replace(vData, "javascript:", "javascript ", 1, -1, 1)
+		vData = Replace(vData, "applet", "&#097;pplet", 1, -1, 0)
+		vData = Replace(vData, "APPLET", "&#065;PPLET", 1, -1, 0)
+		vData = Replace(vData, "Applet", "&#065;pplet", 1, -1, 0)
+		vData = Replace(vData, "applet", "&#065;pplet", 1, -1, 1)
+		vData = Replace(vData, "UNION", "", 1, -1, 0)
+		vData = Replace(vData, "union", "", 1, -1, 0)
+		vData = Replace(vData, "Union", "", 1, -1, 0)
+		vData = Replace(vData, "vbscript:", "vbscript ", 1, -1, 1)
+		vData = Replace(vData, "'", "&apos;")
+		vData = Replace(vData, chr(39), "&apos;")
+		vData = Replace(vData, "%20", " ")
+		SQLInjectionBlocker = vData
+	End Function
+
+	'----------------------------------------
+	'
 	'----------------------------------------
 	Public Property Get RunCount()
 		RunCount = TotalRows
 	End Property
-
-  '----------------------------------------
-	' Form Collector
+	'----------------------------------------
+	'
 	'----------------------------------------
 	Public Sub CollectForm(CollectType)
 		If CollectType = "INSERT" Then
@@ -108,28 +164,28 @@ Class QueryManager
 
 		      ElseIf fieldName = "PASSWORD" OR fieldName = "SIFRE" OR fieldName = "PAROLA" Then
 		          SQLCumle1 = SQLCumle1 & fieldName &", "
-		          SQLCumle2 = SQLCumle2 & "'"& MD5( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& MD5( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "KIMLIK_NO" Then
-		          If IsNumeric(LoginKontrol(Request.Form(fieldName))) Then SQLCumle1 = SQLCumle1 & fieldName &", "
-		          If IsNumeric(LoginKontrol(Request.Form(fieldName))) Then SQLCumle2 = SQLCumle2 & "'"& Trim(LoginKontrol(Request.Form(fieldName))) &"',"
+		          If IsNumeric(SQLInjectionBlocker(Request.Form(fieldName))) Then SQLCumle1 = SQLCumle1 & fieldName &", "
+		          If IsNumeric(SQLInjectionBlocker(Request.Form(fieldName))) Then SQLCumle2 = SQLCumle2 & "'"& Trim(SQLInjectionBlocker(Request.Form(fieldName))) &"',"
 		      ElseIf fieldName = "KURS_SURESI" Then
 		          SQLCumle1 = SQLCumle1 & fieldName &", "
-		          SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		       ElseIf fieldName = "UCRET" OR fieldName = "KURS_UCRETI" OR fieldName = "DERS_UCRETI" Then
-		          If Len(LoginKontrol(Request.Form(fieldName))) > 4 Then SQLCumle1 = SQLCumle1 & fieldName &", "
-		          If Len(LoginKontrol(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          If Len(SQLInjectionBlocker(Request.Form(fieldName))) > 4 Then SQLCumle1 = SQLCumle1 & fieldName &", "
+		          If Len(SQLInjectionBlocker(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "KURS_YILI" OR fieldName = "YIL"  Then
 		          SQLCumle1 = SQLCumle1 & fieldName &", "
-		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( LoginKontrol(Request.Form(fieldName)) & "-01-01" ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( SQLInjectionBlocker(Request.Form(fieldName)) & "-01-01" ) &"',"
 		      ElseIf fieldName = "DOGUM_TARIHI" Then
 		          SQLCumle1 = SQLCumle1 & fieldName &", "
-		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "BITIS_TARIHI" OR fieldName = "BASLANGIC_TARIHI" OR fieldName = "GUNCELLENME_TARIHI" OR fieldName = "EKLENME_TARIHI" OR fieldName = "OGRENCI_KAYIT_BASLANGIC" OR fieldName = "OGRENCI_KAYIT_BITIS" Then
-		          If Len(LoginKontrol(Request.Form(fieldName))) > 4 Then SQLCumle1 = SQLCumle1 & fieldName &", "
-		          If Len(LoginKontrol(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& BlogDateFunc( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          If Len(SQLInjectionBlocker(Request.Form(fieldName))) > 4 Then SQLCumle1 = SQLCumle1 & fieldName &", "
+		          If Len(SQLInjectionBlocker(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& BlogDateFunc( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      Else
 		          SQLCumle1 = SQLCumle1 & ""& fieldName &","
-		          SQLCumle2 = SQLCumle2 & "'"& LoginKontrol(Request.Form(fieldName)) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& SQLInjectionBlocker(Request.Form(fieldName)) &"',"
 		      End If
 		  Next
 		End If
@@ -142,22 +198,22 @@ Class QueryManager
 	        If fieldName = "file" OR fieldName = "FAVICON" Then 
 
 	        ElseIf fieldName = "PASSWORD" Then
-	            tmp_pass = Trim(LoginKontrol(Request.Form(fieldName)))
+	            tmp_pass = Trim(SQLInjectionBlocker(Request.Form(fieldName)))
 	            If Len(tmp_pass) > 4 Then  SQLCumle2 = SQLCumle2 & "PASSWORD = '"& MD5( tmp_pass ) &"',"
 	        ElseIf fieldName = "KIMLIK_NO" Then
-	            If IsNumeric(LoginKontrol(Request.Form(fieldName))) Then SQLCumle2 = SQLCumle2 & "KIMLIK_NO='"& LoginKontrol(Request.Form(fieldName)) &"',"
+	            If IsNumeric(SQLInjectionBlocker(Request.Form(fieldName))) Then SQLCumle2 = SQLCumle2 & "KIMLIK_NO='"& SQLInjectionBlocker(Request.Form(fieldName)) &"',"
 		      ElseIf fieldName = "KURS_SURESI" Then
-		          SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "UCRET" OR fieldName = "KURS_UCRETI" OR fieldName = "DERS_UCRETI" Then
-		          If Len(LoginKontrol(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( LoginKontrol(Request.Form(fieldName)) ) &"',"
+		          If Len(SQLInjectionBlocker(Request.Form(fieldName))) > 4 Then SQLCumle2 = SQLCumle2 & "'"& ParaTemizle( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "KURS_YILI" OR fieldName = "YIL"  Then
-		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( LoginKontrol(Request.Form(fieldName)) & "-01-01" ) &"',"
+		          SQLCumle2 = SQLCumle2 & "'"& SQLDate( SQLInjectionBlocker(Request.Form(fieldName)) & "-01-01" ) &"',"
 	        ElseIf fieldName = "DOGUM_TARIHI" Then
-	            SQLCumle2 = SQLCumle2 & ""&fieldName&"='"& SQLDate( LoginKontrol(Request.Form(fieldName)) ) &"',"
+	            SQLCumle2 = SQLCumle2 & ""&fieldName&"='"& SQLDate( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 		      ElseIf fieldName = "BITIS_TARIHI" OR fieldName = "BASLANGIC_TARIHI" OR fieldName = "GUNCELLENME_TARIHI" OR fieldName = "EKLENME_TARIHI" OR fieldName = "OGRENCI_KAYIT_BASLANGIC" OR fieldName = "OGRENCI_KAYIT_BITIS" Then
-	            SQLCumle2 = SQLCumle2 & ""&fieldName&"='"& BlogDateFunc( LoginKontrol(Request.Form(fieldName)) ) &"',"
+	            SQLCumle2 = SQLCumle2 & ""&fieldName&"='"& BlogDateFunc( SQLInjectionBlocker(Request.Form(fieldName)) ) &"',"
 	        Else
-	            SQLCumle2 = SQLCumle2 & ""& fieldName &"='"& LoginKontrol(Request.Form(fieldName)) &"',"
+	            SQLCumle2 = SQLCumle2 & ""& fieldName &"='"& SQLInjectionBlocker(Request.Form(fieldName)) &"',"
 	        End If
 	    Next
 		End If
@@ -185,7 +241,8 @@ Class QueryManager
 		If IsNull(vData) Or IsEmpty(vData) Or Len(vData) < 0 Then 
 			Data = ""
 		Else 
-			Data = Trim( LoginKontrol( Request(""&vData&"") ) )
+			Data = Trim(SQLInjectionBlocker(Request(""&vData&"")))
+			If IsNull(Data) Or IsEmpty(Data) OR Len(Data) < 1 Then Data = URLFrom404(Request.ServerVariables("QUERY_STRING")&"&s=x",vData)
 			If IsNumeric(Data) Then Data = Cint(Data)
 		End If
 	End Property
