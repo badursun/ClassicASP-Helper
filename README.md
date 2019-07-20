@@ -52,22 +52,22 @@ Sonuç olarak kütüphaneden 2 türde yanıt döner.
 
 > POST.ASP
 	<form action="/?Cmd=InsertSample" method="post">
-		<input name="NAME" value="" />
-		<input name="SURNAME" value="" />
-		<input name="BIRTHDAY" value="" />
-		<button type="submit">Submit</button>
+	  <input name="NAME" value="" />
+	  <input name="SURNAME" value="" />
+	  <input name="BIRTHDAY" value="" />
+	  <button type="submit">Submit</button>
 	</form>
 
 > CATCH.ASP
-<%
-If Query.Data("Cmd") = "InsertSample" Then 
-	If Query.RunExtend("INSERT", "tbl_users", "") = True Then
-		Response.Write "Başarılı / Success"
-	Else 
-		Response.Write "Başarısız / Failed"
+	<%
+	If Query.Data("Cmd") = "InsertSample" Then 
+	  If Query.RunExtend("INSERT", "tbl_users", "") = True Then
+	    Response.Write "Başarılı / Success"
+	  Else 
+	    Response.Write "Başarısız / Failed"
+	  End If
 	End If
-End If
-%>
+	%>
 
 
 ### CollectForm & Run
