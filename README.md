@@ -1,12 +1,13 @@
 # ClassicASP-Helper
 ----------------
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](#)
+
 (TR) Bilinen ilk kompakt, Klasik ASP yardımcı kütüphanesidir (araştırmalarıma göre). Sıklıkla yaptığınız işlemleri kısaltan, özellikle veritabanı çalışmalarınızda ve yazılım geliştirme aşamalarında pratiklik ile hız kazanmanızı, geliştirmelerinizi daha kolay yapmanızı sağlayacak yapıdadır. Mevcut kütüphanelerinize entegre edebilir, geliştirebilir ve dağıtabilirsiniz. Lütfen Star vermeyi, Watch listenize eklemeyi unutmayın.
 
 (EN) First Classic ASP Coding Helper Utility
 
 # Usage / Kullanım
 ----------------
+
 > (TR) İlk olarak dosyayı fiziksel yolundan proje dosyanıza include edin.
 > (EN) ...
 
