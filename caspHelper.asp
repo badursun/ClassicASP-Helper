@@ -129,6 +129,7 @@ Class QueryManager
 	' Class Initialize
 	'----------------------------------------
 	Private Sub Class_Initialize()
+		Set db = Conn
 		ExecuteTime 			= Timer
 
 		bad_DBName 				= ""
@@ -155,7 +156,7 @@ Class QueryManager
 		Set Sorgu 				= Nothing
 		Set db 						= Nothing
 
-		If Err <> 0 Then echo("<code>Err Found !</code>")
+		'If Err <> 0 Then echo("<code>Err Found !</code>")
 	End Sub
 
 
@@ -557,9 +558,9 @@ Class QueryManager
 			Exit Property
 		End If
 
-		CountRow = ConnectionObj.Execute("SELECT COUNT("&CountRowName&") FROM "& table & sql_add &"")(0)
+		CountRow = db.Execute("SELECT COUNT("&CountRowName&") FROM "& table & sql_add &"")(0)
 		if Err <> 0 then
-			CountRow = "<code data-toggle=""tooltip"" title=""Error Number: "& Err.Number &" .CountRow(a,b,c)"">* Query Error</code>"
+			CountRow = "<code data-toggle=""tooltip"" title=""Error: "& Err.Description &"<br>Error Number: "& Err.Number &" .CountRow(a,b,c)"">* Query Error</code>"
 		Else
 
 		End If
@@ -573,7 +574,7 @@ Class QueryManager
         .Write "<pre>"
         For each x in Request.Form
             .Write x & ": "
-            .Write LoginKontrol(Request.Form(""& x &"")) & vbcrlf
+            .Write SQLInjectionBlocker(Request.Form(""& x &"")) & vbcrlf
         Next
         .Write "</pre><hr />"
     End With
@@ -599,7 +600,27 @@ Class QueryManager
 	  	Response.End
 		Else
 			' Implement Query
+			On Error Resume Next
 			Set Sorgu = db.Execute(sql)
+			' Errorleri Yakala
+			If Err <> 0 Then 
+			  str_frm = ""
+			  For each x in Request.Form
+			      str_frm = str_frm & x & ": "
+			      str_frm = str_frm & LoginKontrol(Request.Form(""& x &""))
+			  Next
+			  If Len(str_frm) < 1 Then str_frm = "(Forms Empty)"
+				Mesaj = "WEB: "& Request.ServerVariables("SERVER_NAME") &"\n\n URL: "& Request.ServerVariables("QUERY_STRING") &"\n\n FORM: "&str_frm&"\n\nError Code: "& Err.Description &" "
+				a= PushMesaj("Title", Mesaj)
+			
+				Response.Write Err.Line 
+				Response.Write "<br>"
+				Response.Write Err.Description 
+				Response.Write "<br>"
+				Exit Property
+			End If
+			'On Error GoTo 0
+
 			' Get All Row Count
 			If Instr(1, sql, "SQL_CALC_FOUND_ROWS") <> 0 Then
 				Set SorguCount = db.Execute("SELECT FOUND_ROWS()")
@@ -896,7 +917,7 @@ Class QueryManager
 		Else 
 			Data = Trim(SQLInjectionBlocker(Request(""&vData&"")))
 			If IsNull(Data) Or IsEmpty(Data) OR Len(Data) < 1 Then Data = URLFrom404( vData )
-			If IsNumeric(Data) Then Data = Clng(Data)
+			If IsNumeric(Data) Then Data = Trim(Data)
 		End If
 	End Property
 
@@ -1021,7 +1042,7 @@ Class QueryManager
 			Case 2 	: FieldTypeName = "INT"
 			Case 3 	: FieldTypeName = "INT"
 			Case 4 	: FieldTypeName = "INT"
-			Case 5 	: FieldTypeName = "INT"
+			Case 5 	: FieldTypeName = "DOUBLE"
 			Case 7 	: FieldTypeName = "DATE"
 			Case 10 : FieldTypeName = "ERROR"
 			Case 11 : FieldTypeName = "BOOLEAN"
@@ -1085,6 +1106,10 @@ Case "INSERT"
 						ReDim PRESERVE ExtArray2(ii)
 							control_type = GetFieldTypeName(tmp_rs, str_field_name)
 							Select Case control_type
+								Case "DOUBLE"
+									'ExtArray(ii) 		= ""& str_field_name &" = '"& str_field_val &"'["& GetFieldTypeName(tmp_rs, str_field_name) &"]"
+									ExtArray(ii) 		= Trim(str_field_name)
+									ExtArray2(ii) 	= ""& MoneyFormatter(str_field_val) &""
 								Case "INT"
 									'ExtArray(ii) 		= ""& str_field_name &" = '"& str_field_val &"'["& GetFieldTypeName(tmp_rs, str_field_name) &"]"
 									ExtArray(ii) 		= Trim(str_field_name)
@@ -1140,6 +1165,9 @@ Case "UPDATE"
 						ReDim PRESERVE ExtArray(ii)
 							control_type = GetFieldTypeName(tmp_rs, str_field_name)
 							Select Case control_type
+								Case "DOUBLE"
+									'ExtArray(ii) 		= ""& str_field_name &" = '"& str_field_val &"'["& GetFieldTypeName(tmp_rs, str_field_name) &"]"
+									ExtArray(ii) = ""& Trim(str_field_name) &"="& MoneyFormatter(str_field_val) &""
 								Case "INT"
 									'ExtArray(ii) = ""& str_field_name &" = '"& str_field_val &"'["& GetFieldTypeName(tmp_rs, str_field_name) &"]"
 									ExtArray(ii) = ""& Trim(str_field_name) &"="& Trim(str_field_val) &""
