@@ -1,16 +1,23 @@
 # ClassicASP-Helper
 ------------------------
-First Classic ASP Coding Helper Utility
+(TR) Bilinen ilk kompakt, Klasik ASP yardımcı kütüphanesidir (araştırmalarıma göre). Sıklıkla yaptığınız işlemleri kısaltan, özellikle veritabanı çalışmalarınızda ve yazılım geliştirme aşamalarında pratiklik ile hız kazanmanızı, geliştirmelerinizi daha kolay yapmanızı sağlayacak yapıdadır. Mevcut kütüphanelerinize entegre edebilir, geliştirebilir ve dağıtabilirsiniz. Lütfen Star vermeyi, Watch listenize eklemeyi unutmayın.
 
-## Usage
+(EN) First Classic ASP Coding Helper Utility
 
-İlk olarak dosyayı include ediyoruz.
-<!--#include file="casphelper.asp"-->
+# Usage / Kullanım
+------------------------
+(TR) İlk olarak dosyayı fiziksel yolundan proje dosyanıza include edin.
+(EN) 
 
-Eğer kendiniz kütüphaneyi başlatmak isterseniz bu kodu ekledin
+<!--#include file="/{path}/casphelper.asp"-->
+
+(TR) Eğer kendiniz kütüphaneyi başlatmak isterseniz aşağıda ki kodu ilk sırada çalışacak şekilde projenize ekleyin
+(EN) 
+
 	Set Query = New QueryManager
 
-Artık tüm işlemleriniz için Query değişkenini kullanmanız yeterlidir.
+(TR) Artık tüm işlemleriniz için *Query* değişkenini kullanmanız yeterlidir.
+(EN) 
 
 	Dim Query
 	Set Query = New QueryManager
@@ -21,18 +28,30 @@ Artık tüm işlemleriniz için Query değişkenini kullanmanız yeterlidir.
 	Query.Password       = "MyS3c3tP4ssw0d"
 	Query.Connect()
 
-
 ## SQL Insert/Update İşlemi
+### fn: RunExtend
 
-Bir SQL sorgusunu INSERT yapmak istersek, form input name değerlerimizi, ilgili tablonun sütun isimleriyle aynı tutmamız gerekiyor. Kütüphane burada bir kaç işlem yapar.
+Bir SQL sorgusunu INSERT veya UPDATE yapmak istersek, form input name değerlerimizi, ilgili tablonun sütun isimleriyle aynı tutmamız gerekiyor. Kütüphane burada bir kaç işlem yapar.
 * Gelen FORM/POST name parametreleri ve hedef tablo sütun isimleri eşleşiyor mu? Eşleşmiyor ise, alan dışında kalan veriler alınmaz.
 * Gelen veriler, hedef sütun veri türü ile uyuşuyor mu? (INT, VARCHAR/LONGTEXT, DATE/DATETIME)
 * Gelen veriler boşmu?
 
+Sonuç olarak kütüphaneden 2 türde yanıt döner. 
+* INSERT işlemi başarılı ise, ID parametresi ile son eklenen kayıt numarası (INT) döner
+* UPDATE işlemi başarılı ise true, başarısız ise false değeri (BOOLEAN) döner.
+
+- INSERT İşlemi
+	Query.RunExtend("INSERT", vTable, "")
+
+-UPDATE İşlemi
+	Query.RunExtend("UPDATE", vTable, "ID={ID}")
+
+### CollectForm & Run
+Kütüphanenin ilk versiyonunda bulunan Collector ve Run komutlarının birleşimi aşağıda ki gibidir. CollectForm fonksiyonu, FORM Post methodu ile gelen Request.Form parametrelerini toplar ve INSERT yada UPDATE için birleştirir.
 	Query.Debug = False
 	Query.CollectForm("INSERT")
-	Query.AppendRows    = "EKLENME_TARIHI"
-	Query.AppendValues  = "'"& Now() &"'"
+	Query.AppendRows    = "EKSTRA1, EKSTRA2"
+	Query.AppendValues  = "'Manuel Eklenecek Veri 1', 'Manuel Eklenecek Veri 2'"
 	Query.Run("INSERT INTO tbl_tableName("& Query.Rows &") VALUES("& Query.Values &")")
 	Query.Go("?Cmd=OtelOdalari&ID="& Query.MaxID("tbl_tableName") &"&Msg=Success")
 
