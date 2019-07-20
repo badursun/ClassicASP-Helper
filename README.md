@@ -1,3 +1,7 @@
+-----------------
+#: Development Continues - Geliştirme Devam Ediyor :#
+-----------------
+
 ![alt text](https://repository-images.githubusercontent.com/169853626/aa019d80-ab40-11e9-85d6-c0c70c948c42 "ClassicASP Helper")
 
 # ClassicASP-Helper
