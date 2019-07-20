@@ -1,32 +1,30 @@
 # ClassicASP-Helper
-------------------------
 (TR) Bilinen ilk kompakt, Klasik ASP yardımcı kütüphanesidir (araştırmalarıma göre). Sıklıkla yaptığınız işlemleri kısaltan, özellikle veritabanı çalışmalarınızda ve yazılım geliştirme aşamalarında pratiklik ile hız kazanmanızı, geliştirmelerinizi daha kolay yapmanızı sağlayacak yapıdadır. Mevcut kütüphanelerinize entegre edebilir, geliştirebilir ve dağıtabilirsiniz. Lütfen Star vermeyi, Watch listenize eklemeyi unutmayın.
 
 (EN) First Classic ASP Coding Helper Utility
 
 # Usage / Kullanım
-------------------------
 (TR) İlk olarak dosyayı fiziksel yolundan proje dosyanıza include edin.
-(EN) 
+(EN) ...
 
 <!--#include file="/{path}/casphelper.asp"-->
 
 (TR) Eğer kendiniz kütüphaneyi başlatmak isterseniz aşağıda ki kodu ilk sırada çalışacak şekilde projenize ekleyin
-(EN) 
+(EN) ...
 
 	Set Query = New QueryManager
 
 (TR) Artık tüm işlemleriniz için *Query* değişkenini kullanmanız yeterlidir.
-(EN) 
+(EN) ...
 
 	Dim Query
 	Set Query = New QueryManager
-	Query.Debug          = False
-	Query.Host           = "localhost"
-	Query.Database       = "my_db_name"
-	Query.User           = "my_db_username"
-	Query.Password       = "MyS3c3tP4ssw0d"
-	Query.Connect()
+	  Query.Debug          = False
+	  Query.Host           = "localhost"
+	  Query.Database       = "my_db_name"
+	  Query.User           = "my_db_username"
+	  Query.Password       = "MyS3c3tP4ssw0d"
+	  Query.Connect()
 
 ## SQL Insert/Update İşlemi
 ### fn: RunExtend
@@ -41,10 +39,36 @@ Sonuç olarak kütüphaneden 2 türde yanıt döner.
 * UPDATE işlemi başarılı ise true, başarısız ise false değeri (BOOLEAN) döner.
 
 - INSERT İşlemi
-	Query.RunExtend("INSERT", vTable, "")
+	Query.RunExtend("INSERT", "table_name", "")
 
 -UPDATE İşlemi
-	Query.RunExtend("UPDATE", vTable, "ID={ID}")
+	Query.RunExtend("UPDATE", "table_name", "ID={ID}")
+
+> tbl_users
+	ID(INT) Primary Key
+	NAME(VARCHAR)
+	SURNAME(VARCHAR)
+	BIRTHDAY(DATE)
+
+> POST.ASP
+	<form action="/?Cmd=InsertSample" method="post">
+		<input name="NAME" value="" />
+		<input name="SURNAME" value="" />
+		<input name="BIRTHDAY" value="" />
+		<button type="submit">Submit</button>
+	</form>
+
+> CATCH.ASP
+<%
+If Query.Data("Cmd") = "InsertSample" Then 
+	If Query.RunExtend("INSERT", "tbl_users", "") = True Then
+		Response.Write "Başarılı / Success"
+	Else 
+		Response.Write "Başarısız / Failed"
+	End If
+End If
+%>
+
 
 ### CollectForm & Run
 Kütüphanenin ilk versiyonunda bulunan Collector ve Run komutlarının birleşimi aşağıda ki gibidir. CollectForm fonksiyonu, FORM Post methodu ile gelen Request.Form parametrelerini toplar ve INSERT yada UPDATE için birleştirir.
