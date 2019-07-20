@@ -216,39 +216,6 @@ Class QueryManager
 
 
 
-
-	'----------------------------------------
-	' Pusbullet - Push Message Sender
-	'----------------------------------------
-  Public Function PushMesaj(Title, Mesaj)
-  	Gonderen 		= "ujwiU1BpCRosjC1zG0PQJM" ' Adjans SmartIO
-    Alici     	= "ujwiU1BpCRosjxvAqiFXlk" ' Badursun
-    NotTuru   	= "note" '  file, link
-    DomainName	= Request.ServerVariables("SERVER_NAME")
-    Paket = ""
-    Paket=Paket& "{"
-    Paket=Paket& """target_device_iden"": """& Alici &""", "
-    Paket=Paket& """source_device_iden"": """& Gonderen &""", "
-    Paket=Paket& """type"":"""& NotTuru &""", "
-    Paket=Paket& ""
-    Paket=Paket& """title"":"""& Title &""", "
-    Paket=Paket& """body"":"""& Mesaj &"\n\nDomain: "&DomainName&""" "
-    Paket=Paket& "}"
-
-    On Error Resume Next
-    Set PushSender = Server.CreateObject("MSXML2.ServerXMLHTTP.6.0") 
-    With PushSender
-      .Open "POST", "https://api.pushbullet.com/v2/pushes", False
-      .setRequestHeader "Content-Type", "application/json; charset=utf-8"
-      .setRequestHeader "Access-Token", "o.dEm976legEgUAvE6fVW7GujloyKyMtLd"
-      .setTimeouts 5000, 5000, 10000, 10000 'ms - resolve, connect, send, receive
-      .send Paket
-    End With
-  	'Response.Write PushSender.responseText
-  	'Response.End
-    Set PushSender = Nothing
-  End Function
-
 	'----------------------------------------
 	' .ContentType Page Content Type
 	'----------------------------------------
